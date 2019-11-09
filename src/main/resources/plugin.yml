@@ -2,3 +2,7 @@ name: WattEenPlugin
 version: ${project.version}
 main: dev.niekv.WattEenPlugin
 author: "Niek Vincent"
+
+commands:
+  playerstats:
+    description: "Command to toggle the player statistics scoreboard"

@@ -10,9 +10,7 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class ScoreboardManager {
@@ -23,6 +21,7 @@ public class ScoreboardManager {
     private final org.bukkit.scoreboard.ScoreboardManager bukkitScoreboardManager;
 
     private Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
+    private List<UUID> ignoredScoreboard = new ArrayList<>();
 
     public ScoreboardManager(WattEenPlugin plugin) {
         this.plugin = plugin;
@@ -41,7 +40,6 @@ public class ScoreboardManager {
     }
 
     public void initializeScoreboard(Player player) {
-        this.plugin.getLogger().info(Thread.currentThread().getName());
         final PlayerData playerData = this.plugin.getPlayerDataManager().getPlayerData(player);
 
         Scoreboard scoreboard = bukkitScoreboardManager.getNewScoreboard();
@@ -53,6 +51,18 @@ public class ScoreboardManager {
 
     public void update(Player player) {
         this.renderScoreboard(this.scoreboardMap.get(player.getUniqueId()), this.plugin.getPlayerDataManager().getPlayerData(player));
+    }
+
+    public boolean toggleScoreboard(Player player) {
+        if(this.ignoredScoreboard.contains(player.getUniqueId())) {
+            this.ignoredScoreboard.remove(player.getUniqueId());
+            this.initializeScoreboard(player);
+            return true;
+        } else {
+            this.ignoredScoreboard.add(player.getUniqueId());
+            this.cleanup(player);
+            return false;
+        }
     }
 
     private void renderScoreboard(Scoreboard scoreboard, PlayerData playerData) {
@@ -100,7 +110,7 @@ public class ScoreboardManager {
     private String parseTime(long onlineTime) {
         return String.format("%d days %02d:%02d:%02d",
                 TimeUnit.MILLISECONDS.toDays(onlineTime),
-                TimeUnit.MILLISECONDS.toHours(onlineTime),
+                TimeUnit.MILLISECONDS.toHours(onlineTime) % 24,
                 TimeUnit.MILLISECONDS.toMinutes(onlineTime) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(onlineTime)),
                 TimeUnit.MILLISECONDS.toSeconds(onlineTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(onlineTime)));
     }

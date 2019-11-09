@@ -1,11 +1,13 @@
 package dev.niekv;
 
+import dev.niekv.command.PlayerStatsCommand;
 import dev.niekv.datastorage.MySqlDataStorage;
 import dev.niekv.listener.DeathListener;
 import dev.niekv.listener.JoinLeaveListener;
 import dev.niekv.listener.PlayerChatListener;
 import dev.niekv.player.PlayerDataManager;
 import dev.niekv.scoreboard.ScoreboardManager;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class WattEenPlugin extends JavaPlugin {
@@ -37,6 +39,11 @@ public class WattEenPlugin extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new JoinLeaveListener(this), this);
         this.getServer().getPluginManager().registerEvents(new DeathListener(this), this);
         this.getServer().getPluginManager().registerEvents(new PlayerChatListener(), this);
+
+        PluginCommand pluginCommand;
+        if((pluginCommand = this.getCommand("playerstats")) != null) {
+            pluginCommand.setExecutor(new PlayerStatsCommand(this));
+        }
     }
 
     public MySqlDataStorage getMySqlDataStorage() {
